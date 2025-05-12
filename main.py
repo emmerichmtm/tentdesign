@@ -18,7 +18,7 @@ def remove_xy_duplicates_w_lowest_z(points: np.ndarray, tol: float = 1e-8) -> np
     return np.vstack(list(buckets.values()))
 
 # -----------------------------------------------------------------------------
-# Tent class – 100 % DESDEO-free, always saves plots to PNG
+# Tent class – DESDEO-free, always saves plots to PNG
 # -----------------------------------------------------------------------------
 
 class Tent:
@@ -121,7 +121,7 @@ class Tent:
         return save_path
 
 # -----------------------------------------------------------------------------
-# Self-test / demos
+# Self-tests / demos
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
@@ -142,13 +142,36 @@ if __name__ == "__main__":
     print(f"Surface area : {tent.surface_area:.3f}")
     print(f"Volume       : {tent.volume:.3f}\n")
 
-    out_file = tent.plot("tent_output")  # saves tent_output.png
-    print(f"Figure written to → {out_file.resolve()}")
+    pyr_png = tent.plot("demo1_pyramid")
+    print(f"Figure written to → {pyr_png.resolve()}")
 
     # ------------------------------------------------------------------
-    # Demo 2 – "box3" example from screenshot
+    # Demo 2 – unit cube box
     # ------------------------------------------------------------------
-    random_points = np.array([
+    box_points = np.array([
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0],  # floor corners
+        [0.0, 0.0, 1.0],
+        [1.0, 0.0, 1.0],
+        [0.0, 1.0, 1.0],
+        [1.0, 1.0, 1.0],  # ceiling corners
+    ])
+
+    box = Tent(box_points)
+    print("\n=== Demo 2: unit box ===")
+    print(f"Floor area   : {box.floor_area:.3f}")
+    print(f"Surface area : {box.surface_area:.3f}")
+    print(f"Volume       : {box.volume:.3f}\n")
+
+    box_png = box.plot("demo2_box")
+    print(f"Figure written to → {box_png.resolve()}")
+
+    # ------------------------------------------------------------------
+    # Demo 3 – cloud with a base (screenshot example)
+    # ------------------------------------------------------------------
+    cloud_points = np.array([
         [0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0],
         [1.0, 1.0, 0.0],
@@ -166,11 +189,21 @@ if __name__ == "__main__":
         [0.2, 0.2, 0.6],
     ])
 
-    box3 = Tent(random_points)
-    print("\n=== Demo 2: box3 ===")
-    print(f"Floor area   : {box3.floor_area:.3f}")
-    print(f"Surface area : {box3.surface_area:.3f}")
-    print(f"Volume       : {box3.volume:.3f}\n")
+    cloud = Tent(cloud_points)
+    print("\n=== Demo 3: cloud with base ===")
+    print(f"Floor area   : {cloud.floor_area:.3f}")
+    print(f"Surface area : {cloud.surface_area:.3f}")
+    print(f"Volume       : {cloud.volume:.3f}\n")
 
-    box3_out = box3.plot("box3_tent")  # saves box3_tent.png
-    print(f"Figure written to → {box3_out.resolve()}")
+    cloud_png = cloud.plot("demo3_cloud_base")
+    print(f"Figure written to → {cloud_png.resolve()}")
+
+    # ------------------------------------------------------------------
+    # Demo 4 – complex random cloud
+    # ------------------------------------------------------------------
+    rng = np.random.default_rng(42)
+    complex_cloud = rng.random((30, 3))  # 30 random points in unit cube
+
+    complex_tent = Tent(complex_cloud)
+    print("\n=== Demo 4: complex random cloud ===")
+    print
