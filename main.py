@@ -5,7 +5,7 @@ from scipy.spatial import ConvexHull, QhullError
 from pathlib import Path
 
 # -----------------------------------------------------------------------------
-# Helper: keep only the lowest‑z duplicate for every (x, y) pair
+# Helper: keep only the lowest-z duplicate for every (x, y) pair
 # -----------------------------------------------------------------------------
 
 def remove_xy_duplicates_w_lowest_z(points: np.ndarray, tol: float = 1e-8) -> np.ndarray:
@@ -18,11 +18,11 @@ def remove_xy_duplicates_w_lowest_z(points: np.ndarray, tol: float = 1e-8) -> np
     return np.vstack(list(buckets.values()))
 
 # -----------------------------------------------------------------------------
-# Tent class – 100 % DESDEO‑free, always saves plots to PNG
+# Tent class – 100 % DESDEO-free, always saves plots to PNG
 # -----------------------------------------------------------------------------
 
 class Tent:
-    """3‑D convex‑hull wrapper that also computes a 2‑D floor hull.
+    """3-D convex-hull wrapper that also computes a 2-D floor hull.
 
     The *plot* method **always** writes a PNG file instead of popping up a GUI
     window. Pass a *save_path* or let it default to *"tent_plot.png"* in the
@@ -41,7 +41,7 @@ class Tent:
     # ---------------------------------------------------------------------
     @property
     def floor_area(self) -> float:
-        return self.floor_hull.volume  # 2‑D hull uses .volume for polygon area
+        return self.floor_hull.volume  # 2-D hull uses .volume for polygon area
 
     @property
     def surface_area(self) -> float:
@@ -64,11 +64,11 @@ class Tent:
         pc = remove_xy_duplicates_w_lowest_z(self._point_cloud)
         self.floor_hull = ConvexHull(pc[:, :2])
         floor_vertices = np.unique(self.floor_hull.simplices)
-        self._point_cloud[floor_vertices, 2] = 0.0  # project to z = 0
+        self._point_cloud[floor_vertices, 2] = 0.0  # project to z = 0
 
     def make_hull(self, tries: int = 10) -> None:
         if tries == 0:
-            raise RuntimeError("Convex‑hull construction failed after offsets.")
+            raise RuntimeError("Convex-hull construction failed after offsets.")
         try:
             self.make_floor()
             self.main_hull = ConvexHull(self._point_cloud)
@@ -105,7 +105,7 @@ class Tent:
                     self._point_cloud[simplex, 1],
                     self._point_cloud[simplex, 2])
 
-        # Semi‑transparent faces
+        # Semi-transparent faces
         faces = self._point_cloud[self.main_hull.simplices]
         coll = Poly3DCollection(faces, alpha=0.4)
         ax.add_collection3d(coll)
@@ -121,11 +121,13 @@ class Tent:
         return save_path
 
 # -----------------------------------------------------------------------------
-# Self‑test / demo
+# Self-test / demos
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    # Square‑base pyramid point cloud
+    # ------------------------------------------------------------------
+    # Demo 1 – square-base pyramid
+    # ------------------------------------------------------------------
     pts = np.array([
         [0.0, 0.0, 0.0],
         [1.0, 0.0, 0.0],
@@ -135,9 +137,40 @@ if __name__ == "__main__":
     ])
 
     tent = Tent(pts)
+    print("=== Demo 1: pyramid ===")
     print(f"Floor area   : {tent.floor_area:.3f}")
     print(f"Surface area : {tent.surface_area:.3f}")
-    print(f"Volume       : {tent.volume:.3f}")
+    print(f"Volume       : {tent.volume:.3f}\n")
 
-    out_file = tent.plot("tent_output")  # will save as tent_output.png
-    print(f"Figure written to → {out_file.absolute()}")
+    out_file = tent.plot("tent_output")  # saves tent_output.png
+    print(f"Figure written to → {out_file.resolve()}")
+
+    # ------------------------------------------------------------------
+    # Demo 2 – "box3" example from screenshot
+    # ------------------------------------------------------------------
+    random_points = np.array([
+        [0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0],
+        [1.0, 0.0, 0.0],  # floor
+        [0.0, 0.0, 0.5],
+        [0.0, 1.0, 0.5],
+        [1.0, 1.0, 0.5],
+        [1.0, 0.0, 0.5],  # floor + 0.5
+        [0.0, 0.3, 0.9],
+        [0.4, 0.2, 1.1],
+        [0.1, 0.4, 1.3],
+        [0.4, 0.5, 0.9],
+        [0.5, 0.7, 1.3],
+        [0.2, 0.3, 0.6],
+        [0.2, 0.2, 0.6],
+    ])
+
+    box3 = Tent(random_points)
+    print("\n=== Demo 2: box3 ===")
+    print(f"Floor area   : {box3.floor_area:.3f}")
+    print(f"Surface area : {box3.surface_area:.3f}")
+    print(f"Volume       : {box3.volume:.3f}\n")
+
+    box3_out = box3.plot("box3_tent")  # saves box3_tent.png
+    print(f"Figure written to → {box3_out.resolve()}")
